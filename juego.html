@@ -205,32 +205,6 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        
-        .questions-info {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            text-align: left;
-        }
-        
-        .questions-info h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .questions-list {
-            text-align: left;
-            margin-top: 20px;
-        }
-        
-        .question-item {
-            background-color: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border-left: 4px solid #3498db;
-        }
     </style>
 </head>
 <body>
@@ -263,11 +237,6 @@
                 <div id="resultMessage"></div>
             </div>
         </div>
-        
-        <div class="questions-info">
-            <h3>Preguntas del Juego - Lóbulo Occipital</h3>
-            <div class="questions-list" id="questionsList"></div>
-        </div>
     </div>
 
     <script>
@@ -283,7 +252,6 @@
         const startBtn = document.getElementById('startBtn');
         const jumpBtn = document.getElementById('jumpBtn');
         const pauseBtn = document.getElementById('pauseBtn');
-        const questionsList = document.getElementById('questionsList');
 
         // Variables del juego
         let score = 0;
@@ -350,21 +318,6 @@
         /*******************************************************/
         /* FIN DE LA SECCIÓN DE PREGUNTAS                      */
         /*******************************************************/
-
-        // Inicializar preguntas en la interfaz
-        function renderQuestions() {
-            questionsList.innerHTML = '';
-            questions.forEach((q, index) => {
-                const questionItem = document.createElement('div');
-                questionItem.className = 'question-item';
-                questionItem.innerHTML = `
-                    <strong>${q.question}</strong><br>
-                    <em>Correcta:</em> ${q.correctAnswer}<br>
-                    <em>Incorrectas:</em> ${q.wrongAnswers.join(', ')}
-                `;
-                questionsList.appendChild(questionItem);
-            });
-        }
 
         // Inicializar el juego
         function initGame() {
@@ -620,9 +573,6 @@
                 jump();
             }
         });
-
-        // Inicializar preguntas
-        renderQuestions();
     </script>
 </body>
 </html>
