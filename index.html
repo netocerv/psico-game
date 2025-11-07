@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinosaurio con Preguntas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-container {
+            position: relative;
+            margin: 20px auto;
+            width: 600px;
+            height: 150px;
+            border: 2px solid #2c3e50;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .dino {
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            width: 40px;
+            height: 40px;
+            background-color: #2c3e50;
+            border-radius: 5px;
+            transition: bottom 0.3s;
+        }
+        
+        .cactus {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 40px;
+            background-color: #27ae60;
+            border-radius: 3px;
+        }
+        
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 10px;
+            background-color: #7f8c8d;
+        }
+        
+        .cloud {
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+        }
+        
+        .score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .question-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .question-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.3s;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .question-text {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .answer-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .answer-btn {
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        .answer-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .answer-btn.correct {
+            background-color: #27ae60;
+        }
+        
+        .answer-btn.incorrect {
+            background-color: #e74c3c;
+        }
+        
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .pulse {
+            animation: pulse 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .questions-info {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .questions-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .questions-list {
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .question-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dinosaurio con Preguntas</h1>
+        <p>Salta sobre los cactus y responde correctamente para continuar jugando</p>
+        
+        <div class="game-container">
+            <div class="score">Puntuación: <span id="score">0</span></div>
+            <div class="dino" id="dino"></div>
+            <div class="ground"></div>
+            <div class="game-over" id="gameOver">¡Game Over!</div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">Iniciar Juego</button>
+            <button id="jumpBtn">Saltar (Espacio)</button>
+            <button id="pauseBtn">Pausa</button>
+        </div>
+        
+        <div class="instructions">
+            Presiona ESPACIO o haz clic en el botón "Saltar" para evitar los cactus.
+            Cuando mueras, deberás responder una pregunta para continuar.
+        </div>
+        
+        <div class="question-modal" id="questionModal">
+            <div class="question-content">
+                <div class="question-text" id="questionText"></div>
+                <div class="answer-options" id="answerOptions"></div>
+                <div id="resultMessage"></div>
+            </div>
+        </div>
+        
+        <div class="questions-info">
+            <h3>Preguntas del Juego - Lóbulo Occipital</h3>
+            <div class="questions-list" id="questionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const dino = document.getElementById('dino');
+        const gameContainer = document.querySelector('.game-container');
+        const scoreElement = document.getElementById('score');
+        const gameOverElement = document.getElementById('gameOver');
+        const questionModal = document.getElementById('questionModal');
+        const questionText = document.getElementById('questionText');
+        const answerOptions = document.getElementById('answerOptions');
+        const resultMessage = document.getElementById('resultMessage');
+        const startBtn = document.getElementById('startBtn');
+        const jumpBtn = document.getElementById('jumpBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const questionsList = document.getElementById('questionsList');
+
+        // Variables del juego
+        let score = 0;
+        let isJumping = false;
+        let isGameOver = false;
+        let isPaused = false;
+        let gameSpeed = 5;
+        let obstacles = [];
+        let clouds = [];
+        let gameInterval;
+        let obstacleInterval;
+        let cloudInterval;
+        let currentQuestionIndex = 0;
+
+        /*******************************************************/
+        /* PREGUNTAS SOBRE EL LÓBULO OCCIPITAL                 */
+        /*******************************************************/
+        let questions = [
+            {
+                question: "¿Dónde se localiza el lóbulo occipital y cuál es su función principal?",
+                correctAnswer: "Se localiza en la parte posterior del cerebro. Su función principal está relacionada con la percepción de estímulos visuales captados por los ojos.",
+                wrongAnswers: [
+                    "Se localiza en la parte frontal del cerebro, y su función principal está relacionada con el movimiento",
+                    "Se localiza en la parte inferior del cerebro, y su función principal está relacionada con el habla"
+                ]
+            },
+            {
+                question: "¿Qué área del lóbulo occipital se conoce como corteza visual primaria (V1) y con qué tipo de transformación está asociada?",
+                correctAnswer: "La corteza visual primaria o área V1 se encarga de procesar estímulos visuales básicos como formas, colores y movimiento, a través de transformaciones neuroquímicas y electroquímicas.",
+                wrongAnswers: [
+                    "Se encarga de reconocer rostros y resolver cálculos matemáticos",
+                    "Procesa únicamente colores brillantes",
+                    "Controla el equilibrio y la postura corporal"
+                ]
+            },
+            {
+                question: "¿Qué funciones cumplen las áreas visuales secundarias (V2, V3, V4 y V5)?",
+                correctAnswer: "V2 y V3: análisis de forma y profundidad; V4: percepción del color; V5 (MT): percepción del movimiento.",
+                wrongAnswers: [
+                    "Regulan el sueño y la memoria episódica",
+                    "Controlan el olfato y el gusto",
+                    "Solo participan en la audición"
+                ]
+            },
+            {
+                question: "¿Qué tipo de alteraciones pueden ocurrir si hay daño en el lóbulo occipital?",
+                correctAnswer: "Pueden aparecer ceguera cortical, dificultad para reconocer objetos, problemas con la percepción de colores o de movimiento.",
+                wrongAnswers: [
+                    "Problemas para caminar y mantener el equilibrio",
+                    "Dificultades de lenguaje expresivo",
+                    "Aumento de la memoria a largo plazo"
+                ]
+            },
+            {
+                question: "¿Cómo interactúa el lóbulo occipital con otras regiones del cerebro en la percepción visual?",
+                correctAnswer: "Con el lóbulo parietal: ubicación de objetos en el espacio; con el temporal: reconocimiento e identificación de objetos.",
+                wrongAnswers: [
+                    "Con el lóbulo frontal regula las emociones visuales",
+                    "Con la amígdala procesa el miedo y el estrés visual",
+                    "No interactúa con otras regiones en absoluto"
+                ]
+            }
+        ];
+        /*******************************************************/
+        /* FIN DE LA SECCIÓN DE PREGUNTAS                      */
+        /*******************************************************/
+
+        // Inicializar preguntas en la interfaz
+        function renderQuestions() {
+            questionsList.innerHTML = '';
+            questions.forEach((q, index) => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'question-item';
+                questionItem.innerHTML = `
+                    <strong>${q.question}</strong><br>
+                    <em>Correcta:</em> ${q.correctAnswer}<br>
+                    <em>Incorrectas:</em> ${q.wrongAnswers.join(', ')}
+                `;
+                questionsList.appendChild(questionItem);
+            });
+        }
+
+        // Inicializar el juego
+        function initGame() {
+            score = 0;
+            isGameOver = false;
+            isPaused = false;
+            gameSpeed = 5;
+            obstacles = [];
+            clouds = [];
+            scoreElement.textContent = score;
+            gameOverElement.style.display = 'none';
+            dino.style.bottom = '0';
+            
+            // Limpiar obstáculos y nubes existentes
+            document.querySelectorAll('.cactus').forEach(el => el.remove());
+            document.querySelectorAll('.cloud').forEach(el => el.remove());
+            
+            // Detener intervalos anteriores si existen
+            clearInterval(gameInterval);
+            clearInterval(obstacleInterval);
+            clearInterval(cloudInterval);
+            
+            // Iniciar intervalos del juego
+            gameInterval = setInterval(updateGame, 20);
+            obstacleInterval = setInterval(createObstacle, 1500);
+            cloudInterval = setInterval(createCloud, 3000);
+        }
+
+        // Actualizar el estado del juego
+        function updateGame() {
+            if (isPaused || isGameOver) return;
+            
+            // Actualizar puntuación
+            score++;
+            scoreElement.textContent = score;
+            
+            // Aumentar velocidad gradualmente
+            if (score % 100 === 0) {
+                gameSpeed += 0.5;
+            }
+            
+            // Mover obstáculos
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obstacle = obstacles[i];
+                const currentLeft = parseInt(obstacle.element.style.left) || gameContainer.offsetWidth;
+                obstacle.element.style.left = (currentLeft - gameSpeed) + 'px';
+                
+                // Detectar colisión
+                if (checkCollision(dino, obstacle.element)) {
+                    gameOver();
+                    return;
+                }
+                
+                // Eliminar obstáculos que salen de la pantalla
+                if (parseInt(obstacle.element.style.left) < -20) {
+                    obstacle.element.remove();
+                    obstacles.splice(i, 1);
+                }
+            }
+            
+            // Mover nubes
+            for (let i = clouds.length - 1; i >= 0; i--) {
+                const cloud = clouds[i];
+                const currentLeft = parseInt(cloud.element.style.left) || gameContainer.offsetWidth;
+                cloud.element.style.left = (currentLeft - (gameSpeed / 2)) + 'px';
+                
+                // Eliminar nubes que salen de la pantalla
+                if (parseInt(cloud.element.style.left) < -60) {
+                    cloud.element.remove();
+                    clouds.splice(i, 1);
+                }
+            }
+        }
+
+        // Crear obstáculo
+        function createObstacle() {
+            if (isPaused || isGameOver) return;
+            
+            const obstacle = document.createElement('div');
+            obstacle.className = 'cactus';
+            obstacle.style.left = gameContainer.offsetWidth + 'px';
+            gameContainer.appendChild(obstacle);
+            
+            obstacles.push({
+                element: obstacle
+            });
+        }
+
+        // Crear nube
+        function createCloud() {
+            if (isPaused || isGameOver) return;
+            
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.top = Math.random() * 60 + 'px';
+            cloud.style.left = gameContainer.offsetWidth + 'px';
+            gameContainer.appendChild(cloud);
+            
+            clouds.push({
+                element: cloud
+            });
+        }
+
+        // Verificar colisión
+        function checkCollision(dino, obstacle) {
+            const dinoRect = dino.getBoundingClientRect();
+            const obstacleRect = obstacle.getBoundingClientRect();
+            
+            // Ajustar los rectángulos para una mejor detección de colisión
+            const adjustedDinoRect = {
+                left: dinoRect.left + 10,
+                right: dinoRect.right - 10,
+                top: dinoRect.top + 5,
+                bottom: dinoRect.bottom - 5
+            };
+            
+            const adjustedObstacleRect = {
+                left: obstacleRect.left + 5,
+                right: obstacleRect.right - 5,
+                top: obstacleRect.top + 5,
+                bottom: obstacleRect.bottom - 5
+            };
+            
+            return !(
+                adjustedDinoRect.top > adjustedObstacleRect.bottom ||
+                adjustedDinoRect.right < adjustedObstacleRect.left ||
+                adjustedDinoRect.bottom < adjustedObstacleRect.top ||
+                adjustedDinoRect.left > adjustedObstacleRect.right
+            );
+        }
+
+        // Saltar
+        function jump() {
+            if (isJumping || isGameOver || isPaused) return;
+            
+            isJumping = true;
+            dino.style.bottom = '60px';
+            
+            setTimeout(() => {
+                dino.style.bottom = '0';
+                isJumping = false;
+            }, 500);
+        }
+
+        // Game Over
+        function gameOver() {
+            isGameOver = true;
+            clearInterval(gameInterval);
+            clearInterval(obstacleInterval);
+            clearInterval(cloudInterval);
+            
+            // Mostrar animación de game over
+            gameOverElement.style.display = 'block';
+            gameOverElement.classList.add('pulse');
+            
+            // Después de un momento, mostrar pregunta
+            setTimeout(showQuestion, 1500);
+        }
+
+        // Mostrar pregunta
+        function showQuestion() {
+            if (questions.length === 0) {
+                alert('No hay preguntas disponibles. Agrega algunas preguntas para continuar.');
+                return;
+            }
+            
+            // Seleccionar pregunta aleatoria
+            currentQuestionIndex = Math.floor(Math.random() * questions.length);
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // Mostrar pregunta
+            questionText.textContent = currentQuestion.question;
+            answerOptions.innerHTML = '';
+            resultMessage.textContent = '';
+            
+            // Crear array de respuestas mezcladas
+            const allAnswers = [
+                currentQuestion.correctAnswer,
+                ...currentQuestion.wrongAnswers
+            ].sort(() => Math.random() - 0.5);
+            
+            // Crear botones de respuesta
+            allAnswers.forEach(answer => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                button.addEventListener('click', () => checkAnswer(answer, currentQuestion.correctAnswer));
+                answerOptions.appendChild(button);
+            });
+            
+            // Mostrar modal
+            questionModal.style.display = 'flex';
+        }
+
+        // Verificar respuesta
+        function checkAnswer(selectedAnswer, correctAnswer) {
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach(button => {
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                } else if (button.textContent === selectedAnswer && selectedAnswer !== correctAnswer) {
+                    button.classList.add('incorrect');
+                }
+                
+                button.disabled = true;
+            });
+            
+            if (selectedAnswer === correctAnswer) {
+                resultMessage.textContent = '¡Correcto! Continuando el juego...';
+                resultMessage.style.color = '#27ae60';
+                
+                setTimeout(() => {
+                    questionModal.style.display = 'none';
+                    continueGame();
+                }, 1500);
+            } else {
+                resultMessage.textContent = 'Incorrecto. Reiniciando juego...';
+                resultMessage.style.color = '#e74c3c';
+                
+                setTimeout(() => {
+                    questionModal.style.display = 'none';
+                    initGame();
+                }, 1500);
+            }
+        }
+
+        // Continuar juego después de respuesta correcta
+        function continueGame() {
+            isGameOver = false;
+            gameOverElement.style.display = 'none';
+            
+            // Continuar intervalos del juego
+            gameInterval = setInterval(updateGame, 20);
+            obstacleInterval = setInterval(createObstacle, 1500);
+            cloudInterval = setInterval(createCloud, 3000);
+        }
+
+        // Pausar/reanudar juego
+        function togglePause() {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? 'Reanudar' : 'Pausa';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', initGame);
+        jumpBtn.addEventListener('click', jump);
+        pauseBtn.addEventListener('click', togglePause);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        });
+
+        // Inicializar preguntas
+        renderQuestions();
+    </script>
+</body>
+</html>
